@@ -12,6 +12,6 @@ namespace Application.Interfaces
     {
         Task<ResultModel<ShortenUrlResponse>> ShortenUrlAsync(string longUrl);
         Task<string> GetLongUrlAsync(string shortUrl);
-        Task<int> GetStatsAsync(string shortUrl);
+        Task<ResultModel<StatsResponse>> GetStatsAsync(string shortUrl);
     }
 }

@@ -34,10 +34,10 @@ namespace API.Controllers
         }
 
         [HttpGet("stats/{shortUrl}")]
-        public async Task<IActionResult> GetStats(string shortCode)
+        public async Task<IActionResult> GetStats(string shortUrl)
         {
-            var count = await _urlService.GetStatsAsync(shortCode);
-            return Ok(new { shortCode, accessCount = count });
+            var result = await _urlService.GetStatsAsync(shortUrl);
+            return Ok(result);
         }
     }
 }

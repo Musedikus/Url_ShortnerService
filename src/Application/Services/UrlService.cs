@@ -48,12 +48,7 @@ namespace Application.Services
 
         public async Task<string> GetLongUrlAsync(string shortUrl)
         {
-            // Extract the short code from the URL
-            var decodedUrl = Uri.UnescapeDataString(shortUrl);
-            if (!Uri.TryCreate(decodedUrl, UriKind.Absolute, out var uri))
-                return null;
-
-            string shortCode = uri.Segments.LastOrDefault()?.Trim('/');
+            var shortCode = UrlHelper.ExtractShortCode(shortUrl);
             if (string.IsNullOrWhiteSpace(shortCode))
                 return null;
 
@@ -66,16 +61,21 @@ namespace Application.Services
             mapping.AccessCount++;
             await _context.SaveChangesAsync();
 
-            return mapping.LongUrl;
+            return mapping.LongUrl!;
         }
 
-        public async Task<int> GetStatsAsync(string shortUrl)
+        public async Task<ResultModel<StatsResponse>> GetStatsAsync(string shortUrl)
         {
             var shortCode = UrlHelper.ExtractShortCode(shortUrl);
-            if (!string.IsNullOrWhiteSpace(shortCode))
-                return 0;
+            if (string.IsNullOrWhiteSpace(shortCode))
+                return ResultModel<StatsResponse>.Failure($"Invalid Url");
+
             var mapping = await _context.UrlMappings.FirstOrDefaultAsync(x => x.ShortCode == shortCode);
-            return mapping?.AccessCount ?? 0;
+
+            if (mapping == null)
+                return ResultModel<StatsResponse>.Failure("No existing data found.");
+
+            return ResultModel<StatsResponse>.SuccessResponse(new StatsResponse { AccessCount = mapping.AccessCount}, "Stats Retrieved Succesfully.");
         }
 
         private async Task<string> GenerateUniqueShortCodeAsync()
